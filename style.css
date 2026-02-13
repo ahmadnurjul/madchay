@@ -16,7 +16,7 @@ body {
   flex-direction: column;
   align-items: center;
   width: 100%;
-  padding-top: 50px; /* Small gap at the very top */
+  padding-top: 150px; /* Small gap at the very top */
 }
 
 #hedlinecontainer {
