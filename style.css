@@ -162,6 +162,16 @@ button:focus-visible {
 
   inset: 0;
 
+  opacity: 0;
+
+  visibility: hidden;
+
+}
+
+.flower-stage.is-ready {
+
+  visibility: visible;
+
   animation:
     flower-arrive 3.5s
     cubic-bezier(.16,.72,.18,1)
@@ -621,7 +631,7 @@ button:focus-visible {
 
   transform: translateX(-50%);
 
-  display: flex;
+  display: none;
 
   gap: 8px;
 
@@ -634,6 +644,12 @@ button:focus-visible {
   background: #fff8efdd;
 
   backdrop-filter: blur(8px);
+
+}
+
+body.nav-unlocked .bottom-nav {
+
+  display: flex;
 
 }
 
