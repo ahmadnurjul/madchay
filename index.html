@@ -1,31 +1,105 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Another Commercial Ship has sunk near Zamboanga City</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#ead8c8">
+  <title>A Little Something for You</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"
+      }
+    }
+  </script>
 </head>
 <body>
+  <main id="app" aria-live="polite">
+    <section class="screen screen--flower is-active" id="flowerScreen">
+      <div class="paper-grain"></div>
+      <p class="eyebrow">a little something, just for you</p>
+      <div class="flower-stage" id="flowerStage">
+        <div id="flowerFallback" class="flower-fallback" aria-label="Bouquet reference preview">
+          <img src="assets/images/bouquet-reference.jpg" alt="Pink flower bouquet reference">
+        </div>
+        <canvas id="flowerCanvas" aria-label="Interactive 3D bouquet"></canvas>
+        <button id="envelopeButton" class="envelope-anchor" aria-label="Open your letter">
+          <span class="envelope">
+            <span class="envelope-flap"></span>
+            <span class="envelope-heart">♥</span>
+          </span>
+          <span class="envelope-hint">a little note for you</span>
+        </button>
+      </div>
+      <p class="instruction">Drag the bouquet gently · tap the little letter</p>
+      <div class="screen-footer">
+        <span class="sound-status" id="soundStatus">♫ background music</span>
+        <button class="text-button" id="musicToggle" type="button">Sound on</button>
+      </div>
+    </section>
 
-  <div class="main-wrapper">
-    <div id="hedlinecontainer">
-      <div id="shine">Happy Valentine's Day💞</div>
+    <section class="screen screen--letter" id="letterScreen">
+      <div class="paper-grain"></div>
+      <button class="back-button" data-go="flower" type="button">← flower</button>
+      <article class="letter-card" id="letterCard">
+        <div class="letter-decoration">✿　♡　✿</div>
+        <p class="letter-kicker">a note from me to you</p>
+        <h1>Dear you,</h1>
+        <div class="letter-copy">
+          <p>I wanted to make you a little something.</p>
+          <p>Something soft, thoughtful, and full of little details — just to remind you that you are appreciated more than words can say.</p>
+          <p>I hope this brings a smile to your day. You deserve all the lovely things. ♡</p>
+        </div>
+        <p class="letter-signoff">with love, <span>me</span></p>
+        <div class="letter-decoration letter-decoration--bottom">✿　♡　✿</div>
+        <button class="surprise-button" id="surpriseButton" type="button">open your audio surprise ♫</button>
+      </article>
+      <nav class="bottom-nav" aria-label="Main navigation">
+        <button data-go="flower" type="button">✿ <span>Flower</span></button>
+        <button class="selected" data-go="letter" type="button">♡ <span>Letter</span></button>
+        <button data-go="audio" type="button">♫ <span>Audio</span></button>
+      </nav>
+    </section>
+
+    <section class="screen screen--audio" id="audioScreen">
+      <div class="paper-grain"></div>
+      <button class="back-button" data-go="letter" type="button">← letter</button>
+      <div class="audio-content">
+        <p class="letter-kicker">a little something extra</p>
+        <div class="record-wrap">
+          <div class="record" id="record"><div class="record-label">♡</div></div>
+          <div class="record-sparkle">✦</div>
+        </div>
+        <h1>One more thing...</h1>
+        <p class="audio-caption">A little surprise, picked just for you.</p>
+        <audio id="surpriseAudio" src="assets/audio/surprise.mp3" preload="metadata"></audio>
+        <div class="player-controls">
+          <button id="playSurprise" class="play-button" type="button" aria-label="Play surprise audio">▶</button>
+          <span id="audioTime">your surprise awaits ♡</span>
+        </div>
+        <p class="audio-note">Take your time. This one's for you.</p>
+      </div>
+      <nav class="bottom-nav" aria-label="Main navigation">
+        <button data-go="flower" type="button">✿ <span>Flower</span></button>
+        <button data-go="letter" type="button">♡ <span>Letter</span></button>
+        <button class="selected" data-go="audio" type="button">♫ <span>Audio</span></button>
+      </nav>
+    </section>
+
+    <div class="welcome-gate" id="welcomeGate">
+      <div class="welcome-card">
+        <span class="welcome-flower">✿</span>
+        <p>a little greeting awaits</p>
+        <button id="enterButton" type="button">tap to open ♡</button>
+        <small>sound begins after you enter</small>
+      </div>
     </div>
-
-    <div class="gallery">
-      <img src="images/d45a2dfa-4bda-4cf2-8610-fb8aca98d869.jpg" alt="a lovely kiss in the night">
-      <img src="images/e572bae5-18bb-49f2-8d4d-96c6d5350e94.jpg" alt="a women inside a car">
-      <img src="images/4d5dc0b5-56a1-4a5e-8615-adb83b7da103.jpg" alt="a baby">
-      <img src="images/378f9eef-5cef-48ab-9fb1-6fa662a8a5be.jpg" alt="a girl in the forest">
-      <img src="images/db14802c-7c8c-4fee-a825-92e3b705dd22.jpg" alt="a girl">
-    </div>
-
-    <div class="invite-container">
-      P.S. You're invited on a date<br>
-      Tomorrow at 3:00 PM 💌
-    </div>
-  </div>
-
+  </main>
+  <script type="module" src="script.js"></script>
 </body>
 </html>
