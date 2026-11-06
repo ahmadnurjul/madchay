@@ -1,10 +1,23 @@
 import * as THREE from "three";
-import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
-import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
-// The filename below follows the spelling supplied: "boquet".
-// Confirm the extension is .glb (not .gbl) and keep this path in sync with your file.
+import { GLTFLoader } from
+  "three/addons/loaders/GLTFLoader.js";
+
+import { OrbitControls } from
+  "three/addons/controls/OrbitControls.js";
+
+
+/* =========================================
+   1. MODEL LOCATION
+========================================= */
+
+// Make sure this matches your actual filename.
 const MODEL_URL = "models/boquet.glb";
+
+
+/* =========================================
+   2. SCREEN NAVIGATION
+========================================= */
 
 const screens = {
   flower: document.getElementById("flowerScreen"),
@@ -12,215 +25,552 @@ const screens = {
   audio: document.getElementById("audioScreen")
 };
 
-const backgroundAudio = new Audio("assets/audio/background.mp3");
+function showScreen(name) {
+
+  Object.entries(screens).forEach(([key, element]) => {
+
+    element.classList.toggle(
+      "is-active",
+      key === name
+    );
+
+  });
+
+  document.querySelectorAll(".bottom-nav button")
+    .forEach(button => {
+
+      button.classList.toggle(
+        "selected",
+        button.dataset.go === name
+      );
+
+    });
+
+  if (name !== "flower") {
+    backgroundAudio.pause();
+  }
+
+}
+
+document.querySelectorAll("[data-go]")
+  .forEach(button => {
+
+    button.addEventListener("click", () => {
+
+      showScreen(button.dataset.go);
+
+    });
+
+  });
+
+
+/* =========================================
+   3. BACKGROUND MUSIC
+========================================= */
+
+const backgroundAudio = new Audio(
+  "assets/audio/background.mp3"
+);
+
 backgroundAudio.loop = true;
 backgroundAudio.volume = 0.35;
 
 const musicToggle = document.getElementById("musicToggle");
 const soundStatus = document.getElementById("soundStatus");
 
-function syncMusicButton() {
-  musicToggle.textContent = backgroundAudio.paused ? "Sound on" : "Sound off";
-  musicToggle.setAttribute("aria-pressed", String(!backgroundAudio.paused));
+function updateMusicButton() {
+
+  musicToggle.textContent =
+    backgroundAudio.paused ? "Sound on" : "Sound off";
+
+  musicToggle.setAttribute(
+    "aria-pressed",
+    String(!backgroundAudio.paused)
+  );
+
 }
-
-function showScreen(name) {
-  Object.entries(screens).forEach(([key, element]) => {
-    element.classList.toggle("is-active", key === name);
-  });
-
-  document.querySelectorAll(".bottom-nav button").forEach(button => {
-    button.classList.toggle("selected", button.dataset.go === name);
-  });
-
-  if (name === "flower") {
-    if (!backgroundAudio.paused) return;
-    // Browsers may block autoplay. Music will start after a user gesture.
-  } else {
-    backgroundAudio.pause();
-    syncMusicButton();
-  }
-}
-
-document.querySelectorAll("[data-go]").forEach(button => {
-  button.addEventListener("click", () => showScreen(button.dataset.go));
-});
 
 musicToggle.addEventListener("click", async () => {
+
   if (backgroundAudio.paused) {
+
     try {
+
       await backgroundAudio.play();
-      soundStatus.textContent = "♫ background music is playing";
-    } catch (_) {
-      soundStatus.textContent = "Add assets/audio/background.mp3 to enable music";
+
+      soundStatus.textContent =
+        "♫ background music is playing";
+
+    } catch (error) {
+
+      soundStatus.textContent =
+        "Check your background.mp3 file";
+
     }
+
   } else {
+
     backgroundAudio.pause();
-    soundStatus.textContent = "♫ background music";
+
+    soundStatus.textContent =
+      "♫ background music";
+
   }
-  syncMusicButton();
+
+  updateMusicButton();
+
 });
 
-backgroundAudio.addEventListener("play", syncMusicButton);
-backgroundAudio.addEventListener("pause", syncMusicButton);
+backgroundAudio.addEventListener("play", updateMusicButton);
+backgroundAudio.addEventListener("pause", updateMusicButton);
 
-const surpriseAudio = document.getElementById("surpriseAudio");
-const playSurprise = document.getElementById("playSurprise");
-const record = document.getElementById("record");
-const audioTime = document.getElementById("audioTime");
 
-document.getElementById("surpriseButton").addEventListener("click", () => {
-  surpriseAudio.pause();
-  showScreen("audio");
-});
+/* =========================================
+   4. AUDIO SURPRISE
+========================================= */
+
+const surpriseAudio =
+  document.getElementById("surpriseAudio");
+
+const playSurprise =
+  document.getElementById("playSurprise");
+
+const record =
+  document.getElementById("record");
+
+const audioTime =
+  document.getElementById("audioTime");
+
+
+document.getElementById("surpriseButton")
+  .addEventListener("click", () => {
+
+    surpriseAudio.pause();
+
+    showScreen("audio");
+
+  });
+
 
 playSurprise.addEventListener("click", async () => {
+
   backgroundAudio.pause();
-  syncMusicButton();
+  updateMusicButton();
 
   if (surpriseAudio.paused) {
+
     try {
+
       await surpriseAudio.play();
-    } catch (_) {
-      audioTime.textContent = "Add your surprise.mp3 file first";
+
+    } catch (error) {
+
+      audioTime.textContent =
+        "Check your surprise.mp3 file";
+
     }
+
   } else {
+
     surpriseAudio.pause();
+
   }
+
 });
+
 
 surpriseAudio.addEventListener("play", () => {
+
   playSurprise.textContent = "Ⅱ";
+
   record.classList.add("playing");
+
   audioTime.textContent = "now playing ♡";
+
 });
+
+
 surpriseAudio.addEventListener("pause", () => {
+
   playSurprise.textContent = "▶";
+
   record.classList.remove("playing");
-  if (!surpriseAudio.ended) audioTime.textContent = "paused";
+
+  if (!surpriseAudio.ended) {
+
+    audioTime.textContent = "paused";
+
+  }
+
 });
+
+
 surpriseAudio.addEventListener("ended", () => {
+
   audioTime.textContent = "replay anytime ♡";
+
 });
 
-// Three.js bouquet stage.
-const canvas = document.getElementById("flowerCanvas");
-const fallback = document.getElementById("flowerFallback");
+
+/* =========================================
+   5. THREE.JS SCENE
+========================================= */
+
+const canvas =
+  document.getElementById("flowerCanvas");
+
+const modelStatus =
+  document.getElementById("modelStatus");
+
+const modelStatusText =
+  document.getElementById("modelStatusText");
+
+
 const renderer = new THREE.WebGLRenderer({
-  canvas,
+
+  canvas: canvas,
+
   alpha: true,
+
   antialias: true,
+
   powerPreference: "high-performance"
+
 });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-renderer.outputColorSpace = THREE.SRGBColorSpace;
-renderer.setClearColor(0x000000, 0);
 
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
-camera.position.set(0, 0.05, 5.2);
-
-scene.add(new THREE.HemisphereLight(0xffffff, 0xb79a83, 2.0));
-
-const keyLight = new THREE.DirectionalLight(0xfff1df, 2.2);
-keyLight.position.set(3, 4, 5);
-scene.add(keyLight);
-
-const fillLight = new THREE.DirectionalLight(0xffc9d0, 0.8);
-fillLight.position.set(-3, 1, -2);
-scene.add(fillLight);
-
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-controls.dampingFactor = 0.07;
-controls.enablePan = false;
-controls.enableZoom = false;
-controls.rotateSpeed = 0.55;
-controls.minPolarAngle = Math.PI * 0.28;
-controls.maxPolarAngle = Math.PI * 0.72;
-
-let bouquet = null;
-let modelBaseY = 0;
-
-function fitBouquetToView(object) {
-  // Normalize model dimensions and center it so different GLB export scales work.
-  const bounds = new THREE.Box3().setFromObject(object);
-  const size = bounds.getSize(new THREE.Vector3());
-  const center = bounds.getCenter(new THREE.Vector3());
-  const largestDimension = Math.max(size.x, size.y, size.z);
-
-  if (!Number.isFinite(largestDimension) || largestDimension <= 0) {
-    throw new Error("The GLB model has no measurable geometry.");
-  }
-
-  object.position.sub(center);
-  const targetSize = 3.25;
-  object.scale.setScalar(targetSize / largestDimension);
-
-  // Re-center after scaling, then apply a small vertical adjustment.
-  const scaledBounds = new THREE.Box3().setFromObject(object);
-  const scaledCenter = scaledBounds.getCenter(new THREE.Vector3());
-  object.position.sub(scaledCenter);
-  modelBaseY = -0.08;
-  object.position.y += modelBaseY;
-
-  // Keep the bouquet's pivot at its visual center for intuitive rotation.
-  scene.add(object);
-}
-
-const loader = new GLTFLoader();
-loader.load(
-  MODEL_URL,
-  gltf => {
-    bouquet = gltf.scene;
-    fitBouquetToView(bouquet);
-    fallback.classList.add("is-hidden");
-    console.info("Bouquet GLB loaded:", MODEL_URL);
-  },
-  progress => {
-    if (progress.total) {
-      console.info(`Loading bouquet: ${Math.round(progress.loaded / progress.total * 100)}%`);
-    }
-  },
-  error => {
-    console.error(`Could not load ${MODEL_URL}. Check the filename, extension, and folder path.`, error);
-    soundStatus.textContent = "Bouquet model not found — check models/boquet.glb";
-  }
+renderer.setPixelRatio(
+  Math.min(window.devicePixelRatio || 1, 2)
 );
 
-function resizeRenderer() {
-  const width = Math.max(1, canvas.clientWidth);
-  const height = Math.max(1, canvas.clientHeight);
-  renderer.setSize(width, height, false);
-  camera.aspect = width / height;
-  camera.updateProjectionMatrix();
-}
-const resizeObserver = new ResizeObserver(resizeRenderer);
-resizeObserver.observe(canvas.parentElement);
-window.addEventListener("resize", resizeRenderer);
-resizeRenderer();
+renderer.outputColorSpace = THREE.SRGBColorSpace;
 
-const clock = new THREE.Clock();
-let baseRotationY = 0;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
 
-function animate() {
-  requestAnimationFrame(animate);
-  const elapsed = clock.getElapsedTime();
+renderer.toneMappingExposure = 1.15;
 
-  // Very subtle idle sway; manual drag rotation remains controlled by OrbitControls.
-  if (bouquet && !controls.enabled) {
-    bouquet.rotation.y = baseRotationY + Math.sin(elapsed * 0.35) * 0.018;
+renderer.setClearColor(0x000000, 0);
+
+
+const scene = new THREE.Scene();
+
+
+const camera = new THREE.PerspectiveCamera(
+  35,
+  1,
+  0.1,
+  100
+);
+
+camera.position.set(0, 0, 5);
+
+
+const hemisphereLight =
+  new THREE.HemisphereLight(
+    0xffffff,
+    0xb79a83,
+    2.0
+  );
+
+scene.add(hemisphereLight);
+
+
+const keyLight =
+  new THREE.DirectionalLight(
+    0xfff1df,
+    2.5
+  );
+
+keyLight.position.set(3, 5, 5);
+
+scene.add(keyLight);
+
+
+const fillLight =
+  new THREE.DirectionalLight(
+    0xffc9d0,
+    1.0
+  );
+
+fillLight.position.set(-4, 1, -3);
+
+scene.add(fillLight);
+
+
+const rimLight =
+  new THREE.DirectionalLight(
+    0xffffff,
+    1.2
+  );
+
+rimLight.position.set(0, 3, -4);
+
+scene.add(rimLight);
+
+
+/* =========================================
+   6. INTERACTIVE ROTATION
+========================================= */
+
+const controls = new OrbitControls(
+  camera,
+  renderer.domElement
+);
+
+controls.enableDamping = true;
+
+controls.dampingFactor = 0.065;
+
+controls.enablePan = false;
+
+controls.enableZoom = false;
+
+controls.rotateSpeed = 0.65;
+
+// Allow rotation around the bouquet.
+// Restrict extreme vertical flipping.
+controls.minPolarAngle = Math.PI * 0.22;
+
+controls.maxPolarAngle = Math.PI * 0.78;
+
+
+/* =========================================
+   7. LOAD THE ACTUAL GLB MODEL
+========================================= */
+
+let bouquet = null;
+
+const loader = new GLTFLoader();
+
+
+loader.load(
+
+  MODEL_URL,
+
+  function (gltf) {
+
+    bouquet = gltf.scene;
+
+    // Calculate the original model dimensions.
+    const bounds = new THREE.Box3()
+      .setFromObject(bouquet);
+
+    const size = bounds.getSize(
+      new THREE.Vector3()
+    );
+
+    const center = bounds.getCenter(
+      new THREE.Vector3()
+    );
+
+    const largestDimension = Math.max(
+      size.x,
+      size.y,
+      size.z
+    );
+
+    if (
+      !Number.isFinite(largestDimension) ||
+      largestDimension <= 0
+    ) {
+
+      throw new Error(
+        "The model contains no measurable geometry."
+      );
+
+    }
+
+    // Center the model around its origin.
+    bouquet.position.sub(center);
+
+    // Normalize its size.
+    const targetSize = 3.3;
+
+    const scale = targetSize / largestDimension;
+
+    bouquet.scale.setScalar(scale);
+
+
+    // Put the model inside a pivot for rotation.
+    const pivot = new THREE.Group();
+
+    pivot.add(bouquet);
+
+    scene.add(pivot);
+
+    // Calculate the final bounding sphere.
+    const finalBounds = new THREE.Box3()
+      .setFromObject(pivot);
+
+    const sphere = finalBounds.getBoundingSphere(
+      new THREE.Sphere()
+    );
+
+    // Adjust the camera to fit the whole bouquet.
+    const radius = sphere.radius;
+
+    const verticalFov =
+      THREE.MathUtils.degToRad(camera.fov);
+
+    const horizontalFov = 2 * Math.atan(
+      Math.tan(verticalFov / 2) * camera.aspect
+    );
+
+    const limitingFov = Math.min(
+      verticalFov,
+      horizontalFov
+    );
+
+    const cameraDistance =
+      (radius / Math.sin(limitingFov / 2)) * 1.15;
+
+    camera.position.set(
+      0,
+      0,
+      cameraDistance
+    );
+
+    camera.near = Math.max(
+      0.01,
+      cameraDistance / 100
+    );
+
+    camera.far = cameraDistance * 100;
+
+    camera.updateProjectionMatrix();
+
+    controls.target.set(0, 0, 0);
+
+    controls.update();
+
+
+    // Hide the loading message.
+    modelStatus.classList.add("hidden");
+
+    console.info("3D bouquet loaded successfully.");
+
+  },
+
+
+  function (progress) {
+
+    if (progress.total) {
+
+      const percent = Math.round(
+        (progress.loaded / progress.total) * 100
+      );
+
+      modelStatusText.textContent =
+        `preparing your flowers... ${percent}%`;
+
+    }
+
+  },
+
+
+  function (error) {
+
+    console.error(
+      "Could not load the 3D bouquet:",
+      error
+    );
+
+    modelStatus.classList.add("error");
+
+    modelStatusText.textContent =
+      "The 3D bouquet could not load. Check models/boquet.glb";
+
   }
 
-  controls.update();
-  renderer.render(scene, camera);
+);
+
+
+/* =========================================
+   8. RESPONSIVE CANVAS
+========================================= */
+
+function resizeScene() {
+
+  const width = Math.max(
+    1,
+    canvas.clientWidth
+  );
+
+  const height = Math.max(
+    1,
+    canvas.clientHeight
+  );
+
+  renderer.setSize(
+    width,
+    height,
+    false
+  );
+
+  camera.aspect = width / height;
+
+  camera.updateProjectionMatrix();
+
 }
+
+
+// Observe the stage, not just the browser window.
+const resizeObserver = new ResizeObserver(
+  resizeScene
+);
+
+resizeObserver.observe(canvas.parentElement);
+
+window.addEventListener(
+  "resize",
+  resizeScene
+);
+
+resizeScene();
+
+
+/* =========================================
+   9. ANIMATION LOOP
+========================================= */
+
+function animate() {
+
+  requestAnimationFrame(animate);
+
+  controls.update();
+
+  renderer.render(
+    scene,
+    camera
+  );
+
+}
+
 animate();
 
-// Envelope lift/open transition.
-const envelopeButton = document.getElementById("envelopeButton");
+
+/* =========================================
+   10. ENVELOPE ANIMATION
+========================================= */
+
+const envelopeButton =
+  document.getElementById("envelopeButton");
+
 envelopeButton.addEventListener("click", () => {
-  if (envelopeButton.classList.contains("opening")) return;
+
+  if (
+    envelopeButton.classList.contains("opening")
+  ) {
+    return;
+  }
+
   envelopeButton.classList.add("opening");
-  setTimeout(() => showScreen("letter"), 1050);
+
+  setTimeout(() => {
+
+    showScreen("letter");
+
+    envelopeButton.classList.remove("opening");
+
+  }, 1100);
+
 });
