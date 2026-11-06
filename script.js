@@ -433,6 +433,26 @@ function fitCameraToBouquet() {
 }
 
 
+// Draws the bouquet once before showing anything,
+// so the envelope and the flowers arrive together.
+function revealBouquet() {
+
+  renderer.render(scene, camera);
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+
+      document.getElementById("flowerStage")
+        .classList.add("is-ready");
+
+      modelStatus.classList.add("hidden");
+
+    });
+  });
+
+}
+
+
 loader.load(
 
   MODEL_URL,
@@ -495,8 +515,10 @@ loader.load(
     fitCameraToBouquet();
 
     // Hide the loading message.
-    document.getElementById("flowerStage").classList.add("is-ready");
-    modelStatus.classList.add("hidden");
+        // Compile shaders and upload textures first, then reveal.
+    renderer.compileAsync(bouquetPivot, camera)
+      .catch(() => {})
+      .then(revealBouquet);
 
     console.info("3D bouquet loaded successfully.");
 
