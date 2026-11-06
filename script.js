@@ -11,32 +11,57 @@ import { MeshoptDecoder } from
 
 
 /* =========================================
-   1. MODEL LOCATION
+   1. MODEL LOCATION & SETTINGS
 ========================================= */
 
+// Make sure this matches your actual filename.
 const MODEL_URL = "assets/models/boquet.glb";
+
+// How much of the page height the bouquet should fill.
+const TARGET_HEIGHT_RATIO = 0.95;
 
 
 /* =========================================
-   2. SCREEN NAVIGATION
+   2. AUDIO ELEMENTS
+========================================= */
+
+// Background music (flower screen only)
+const backgroundAudio = new Audio(
+  "assets/audio/background.mp3"
+);
+
+backgroundAudio.loop = true;
+backgroundAudio.volume = 0.35;
+
+// Surprise audio (audio screen)
+const surpriseAudio =
+  document.getElementById("surpriseAudio");
+
+const playSurprise =
+  document.getElementById("playSurprise");
+
+const record =
+  document.getElementById("record");
+
+const audioTime =
+  document.getElementById("audioTime");
+
+
+/* =========================================
+   3. SCREEN NAVIGATION
 ========================================= */
 
 const screens = {
-
   flower: document.getElementById("flowerScreen"),
-
   letter: document.getElementById("letterScreen"),
-
   audio: document.getElementById("audioScreen")
-
 };
 
-
-const backgroundAudio =
-  document.getElementById("backgroundAudio");
-
+let currentScreen = "flower";
 
 function showScreen(name) {
+
+  currentScreen = name;
 
   Object.entries(screens).forEach(([key, element]) => {
 
@@ -47,7 +72,7 @@ function showScreen(name) {
 
   });
 
-  document.querySelectorAll("[data-go]")
+  document.querySelectorAll(".bottom-nav button")
     .forEach(button => {
 
       button.classList.toggle(
@@ -57,19 +82,18 @@ function showScreen(name) {
 
     });
 
+  // Background music belongs to the flower screen only.
+  if (name === "flower") {
 
-  if (name !== "flower") {
-
-    backgroundAudio.pause();
+    tryStartMusic();
 
   } else {
 
-    attemptBackgroundMusic();
+    backgroundAudio.pause();
 
   }
 
 }
-
 
 document.querySelectorAll("[data-go]")
   .forEach(button => {
@@ -84,155 +108,78 @@ document.querySelectorAll("[data-go]")
 
 
 /* =========================================
-   3. BACKGROUND MUSIC
+   4. BACKGROUND MUSIC (always on in flower screen)
 ========================================= */
 
-const musicToggle =
-  document.getElementById("musicToggle");
-
-const soundStatus =
-  document.getElementById("soundStatus");
-
-
-backgroundAudio.loop = true;
-
-backgroundAudio.volume = 0.35;
-
-
-let musicWasBlocked = false;
-
-
-function updateMusicButton() {
-
-  const playing = !backgroundAudio.paused;
-
-  musicToggle.setAttribute(
-    "aria-pressed",
-    String(playing)
-  );
-
-  soundStatus.textContent =
-    playing ? "Sound off" : "Sound on";
-
-}
-
-
-async function attemptBackgroundMusic() {
-
-  if (!screens.flower.classList.contains("is-active")) {
-    return;
-  }
-
-  if (!backgroundAudio.paused) {
-    return;
-  }
-
-  try {
-
-    await backgroundAudio.play();
-
-    musicWasBlocked = false;
-
-    updateMusicButton();
-
-  } catch (error) {
-
-    musicWasBlocked = true;
-
-    updateMusicButton();
-
-    console.warn(
-      "Browser blocked background autoplay. User interaction is required.",
-      error
-    );
-
-  }
-
-}
-
-
-// Attempt automatic playback immediately.
-attemptBackgroundMusic();
-
-
-// Retry when the user interacts with the page.
-// This allows playback after an autoplay restriction.
-function unlockBackgroundMusic() {
-
-  if (
-    musicWasBlocked &&
-    screens.flower.classList.contains("is-active")
-  ) {
-
-    attemptBackgroundMusic();
-
-  }
-
-}
-
-
-document.addEventListener(
+// Browsers block autoplay until the person touches the page,
+// so we also retry on the first interaction.
+const UNLOCK_EVENTS = [
   "pointerdown",
-  unlockBackgroundMusic,
-  { once: true }
-);
+  "touchend",
+  "click",
+  "keydown"
+];
 
+function removeUnlockListeners() {
 
-musicToggle.addEventListener("click", async () => {
+  UNLOCK_EVENTS.forEach(type => {
 
-  if (backgroundAudio.paused) {
+    document.removeEventListener(type, tryStartMusic);
 
-    try {
+  });
 
-      await backgroundAudio.play();
+}
 
-    } catch (error) {
+function tryStartMusic() {
 
-      console.error(
-        "Background audio could not play:",
-        error
-      );
-
-    }
-
-  } else {
-
-    backgroundAudio.pause();
-
+  // Only on the flower screen, only while the tab is visible,
+  // and never on top of the surprise audio.
+  if (
+    currentScreen !== "flower" ||
+    document.hidden ||
+    !surpriseAudio.paused
+  ) {
+    return;
   }
 
-  updateMusicButton();
+  backgroundAudio.play()
+    .then(removeUnlockListeners)
+    .catch(() => {
+      // Blocked by the browser, retry on next interaction.
+    });
+
+}
+
+UNLOCK_EVENTS.forEach(type => {
+
+  document.addEventListener(
+    type,
+    tryStartMusic,
+    { passive: true }
+  );
 
 });
 
+document.addEventListener("visibilitychange", () => {
 
-backgroundAudio.addEventListener(
-  "play",
-  updateMusicButton
-);
+  if (document.hidden) {
 
-backgroundAudio.addEventListener(
-  "pause",
-  updateMusicButton
-);
+    backgroundAudio.pause();
+
+  } else {
+
+    tryStartMusic();
+
+  }
+
+});
+
+tryStartMusic();
 
 
 /* =========================================
-   4. AUDIO SURPRISE
+   5. AUDIO SURPRISE (same as before)
 ========================================= */
-
-const surpriseAudio =
-  document.getElementById("surpriseAudio");
-
-const playSurprise =
-  document.getElementById("playSurprise");
-
-const record =
-  document.getElementById("record");
-
-const audioTime =
-  document.getElementById("audioTime");
-
 
 document.getElementById("surpriseButton")
   .addEventListener("click", () => {
@@ -248,8 +195,6 @@ playSurprise.addEventListener("click", async () => {
 
   backgroundAudio.pause();
 
-  updateMusicButton();
-
   if (surpriseAudio.paused) {
 
     try {
@@ -258,13 +203,8 @@ playSurprise.addEventListener("click", async () => {
 
     } catch (error) {
 
-      console.error(
-        "Surprise audio error:",
-        error
-      );
-
       audioTime.textContent =
-        "Unable to play the audio. Check surprise.mp3";
+        "Check your surprise.mp3 file";
 
     }
 
@@ -300,6 +240,10 @@ surpriseAudio.addEventListener("pause", () => {
 
   }
 
+  // If the surprise stops while we're on the flower screen,
+  // bring the background music back.
+  tryStartMusic();
+
 });
 
 
@@ -311,7 +255,7 @@ surpriseAudio.addEventListener("ended", () => {
 
 
 /* =========================================
-   5. THREE.JS SCENE
+   6. THREE.JS SCENE
 ========================================= */
 
 const canvas =
@@ -336,16 +280,13 @@ const renderer = new THREE.WebGLRenderer({
 
 });
 
-
 renderer.setPixelRatio(
   Math.min(window.devicePixelRatio || 1, 2)
 );
 
-renderer.outputColorSpace =
-  THREE.SRGBColorSpace;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
 
-renderer.toneMapping =
-  THREE.ACESFilmicToneMapping;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
 
 renderer.toneMappingExposure = 1.15;
 
@@ -364,10 +305,6 @@ const camera = new THREE.PerspectiveCamera(
 
 camera.position.set(0, 0, 5);
 
-
-/* =========================================
-   6. LIGHTING
-========================================= */
 
 const hemisphereLight =
   new THREE.HemisphereLight(
@@ -413,7 +350,21 @@ scene.add(rimLight);
 
 
 /* =========================================
-   7. INTERACTIVE ROTATION
+   7. LOAD THE ACTUAL GLB MODEL
+========================================= */
+
+let bouquet = null;
+let bouquetPivot = null;
+
+const bouquetSize = new THREE.Vector3();
+
+const loader = new GLTFLoader();
+
+loader.setMeshoptDecoder(MeshoptDecoder);
+
+
+/* =========================================
+   8. INTERACTIVE ROTATION
 ========================================= */
 
 const controls = new OrbitControls(
@@ -431,108 +382,51 @@ controls.enableZoom = false;
 
 controls.rotateSpeed = 0.65;
 
+// Allow rotation around the bouquet.
+// Restrict extreme vertical flipping.
 controls.minPolarAngle = Math.PI * 0.22;
 
 controls.maxPolarAngle = Math.PI * 0.78;
 
 
-/* =========================================
-   8. MODEL LOADING
-========================================= */
+// Places the camera so the bouquet fills 95% of the page height.
+function fitCameraToBouquet() {
 
-let bouquet = null;
+  if (!bouquetPivot) return;
 
-let bouquetPivot = null;
-
-let modelRadius = 1;
-
-
-const loader = new GLTFLoader();
-
-loader.setMeshoptDecoder(MeshoptDecoder);
-
-
-function updateCameraFraming() {
-
-  if (!bouquetPivot) {
-    return;
-  }
-
-  const width = Math.max(
-    1,
-    canvas.clientWidth
+  const tanHalf = Math.tan(
+    THREE.MathUtils.degToRad(camera.fov) / 2
   );
 
-  const height = Math.max(
-    1,
-    canvas.clientHeight
-  );
+  const distForHeight =
+    (bouquetSize.y / TARGET_HEIGHT_RATIO) / (2 * tanHalf);
 
-  const landscape = width > height;
+  // Safeguard for narrow phones: never let the sides get clipped.
+  const widest = Math.max(bouquetSize.x, bouquetSize.z);
 
-  const verticalFov =
-    THREE.MathUtils.degToRad(camera.fov);
+  const distForWidth =
+    (widest / 0.98) / (2 * tanHalf * camera.aspect);
 
-  const horizontalFov = 2 * Math.atan(
-    Math.tan(verticalFov / 2) *
-    camera.aspect
-  );
+  const distance =
+    Math.max(distForHeight, distForWidth) +
+    bouquetSize.z / 2;
 
+  // Keep the current viewing angle, only change the distance.
+  const direction = camera.position
+    .clone()
+    .sub(controls.target);
 
-  let cameraDistance;
+  if (direction.lengthSq() === 0) direction.set(0, 0, 1);
 
+  direction.normalize().multiplyScalar(distance);
 
-  if (landscape) {
+  camera.position.copy(controls.target).add(direction);
 
-    /*
-      LANDSCAPE:
-      Model fills approximately 90% of stage height.
-    */
+  camera.near = Math.max(0.01, distance / 100);
 
-    const targetHeight = 0.90;
-
-    cameraDistance =
-      modelRadius /
-      (
-        targetHeight *
-        Math.tan(verticalFov / 2)
-      );
-
-  } else {
-
-    /*
-      PORTRAIT:
-      Model fills approximately 80% of stage width.
-    */
-
-    const targetWidth = 0.80;
-
-    cameraDistance =
-      modelRadius /
-      (
-        targetWidth *
-        Math.tan(horizontalFov / 2)
-      );
-
-  }
-
-
-  camera.position.set(
-    0,
-    0,
-    cameraDistance
-  );
-
-  camera.near = Math.max(
-    0.01,
-    cameraDistance / 100
-  );
-
-  camera.far = cameraDistance * 100;
+  camera.far = distance * 100;
 
   camera.updateProjectionMatrix();
-
-  controls.target.set(0, 0, 0);
 
   controls.update();
 
@@ -545,126 +439,72 @@ loader.load(
 
   function (gltf) {
 
-    try {
+    bouquet = gltf.scene;
 
-      bouquet = gltf.scene;
+    // Calculate the original model dimensions.
+    const bounds = new THREE.Box3()
+      .setFromObject(bouquet);
 
-      bouquetPivot = new THREE.Group();
+    const size = bounds.getSize(
+      new THREE.Vector3()
+    );
 
-      bouquetPivot.add(bouquet);
+    const center = bounds.getCenter(
+      new THREE.Vector3()
+    );
 
-      bouquetPivot.updateMatrixWorld(true);
+    const largestDimension = Math.max(
+      size.x,
+      size.y,
+      size.z
+    );
 
+    if (
+      !Number.isFinite(largestDimension) ||
+      largestDimension <= 0
+    ) {
 
-      // Calculate original dimensions.
-      const bounds = new THREE.Box3()
-        .setFromObject(bouquetPivot);
-
-      const size = bounds.getSize(
-        new THREE.Vector3()
+      throw new Error(
+        "The model contains no measurable geometry."
       );
-
-      const center = bounds.getCenter(
-        new THREE.Vector3()
-      );
-
-
-      const largestDimension = Math.max(
-        size.x,
-        size.y,
-        size.z
-      );
-
-
-      if (
-        !Number.isFinite(largestDimension) ||
-        largestDimension <= 0
-      ) {
-
-        throw new Error(
-          "The model contains no measurable geometry."
-        );
-
-      }
-
-
-      // Normalize model dimensions.
-      const targetSize = 3.3;
-
-      const scale =
-        targetSize / largestDimension;
-
-
-      bouquetPivot.scale.setScalar(scale);
-
-
-      // Center model correctly.
-      bouquetPivot.position.copy(center)
-        .multiplyScalar(-scale);
-
-
-      scene.add(bouquetPivot);
-
-      bouquetPivot.updateMatrixWorld(true);
-
-
-      // Calculate final bounding sphere.
-      const finalBounds = new THREE.Box3()
-        .setFromObject(bouquetPivot);
-
-      const sphere = finalBounds.getBoundingSphere(
-        new THREE.Sphere()
-      );
-
-      modelRadius = sphere.radius;
-
-
-      // Frame the model based on screen orientation.
-      updateCameraFraming();
-
-
-      // Show envelope only after successful model loading.
-      modelStatus.classList.add("hidden");
-
-      const envelopeButton =
-        document.getElementById("envelopeButton");
-
-      envelopeButton.hidden = false;
-
-
-      console.info(
-        "3D bouquet loaded successfully.",
-        gltf
-      );
-
-      console.log(
-        "Model dimensions:",
-        size
-      );
-
-
-    } catch (error) {
-
-      console.error(
-        "Error processing the bouquet:",
-        error
-      );
-
-      modelStatus.classList.remove("hidden");
-
-      modelStatus.classList.add("error");
-
-      modelStatusText.textContent =
-        "The model loaded, but could not be displayed.";
 
     }
+
+    // Center the model around its origin.
+    bouquet.position.sub(center);
+
+    // Normalize its size.
+    bouquet.scale.setScalar(3.3 / largestDimension);
+
+    // Put the model inside a pivot.
+    bouquetPivot = new THREE.Group();
+
+    bouquetPivot.add(bouquet);
+
+    scene.add(bouquetPivot);
+
+    // Remember the final size for camera fitting.
+    new THREE.Box3()
+      .setFromObject(bouquetPivot)
+      .getSize(bouquetSize);
+
+    controls.target.set(0, 0, 0);
+
+    camera.position.set(0, 0, 10);
+
+    fitCameraToBouquet();
+
+    // Hide the loading message.
+    modelStatus.classList.add("hidden");
+
+    console.info("3D bouquet loaded successfully.");
 
   },
 
 
   function (progress) {
 
-    if (progress.total > 0) {
+    if (progress.total) {
 
       const percent = Math.round(
         (progress.loaded / progress.total) * 100
@@ -685,17 +525,10 @@ loader.load(
       error
     );
 
-    console.error(
-      "Model URL:",
-      MODEL_URL
-    );
-
-    modelStatus.classList.remove("hidden");
-
     modelStatus.classList.add("error");
 
     modelStatusText.textContent =
-      "Unable to load the 3D bouquet. Check the browser console.";
+      "The 3D bouquet could not load. Check assets/models/boquet.glb";
 
   }
 
@@ -718,49 +551,33 @@ function resizeScene() {
     canvas.clientHeight
   );
 
-
   renderer.setSize(
     width,
     height,
     false
   );
 
-
   camera.aspect = width / height;
 
   camera.updateProjectionMatrix();
 
-
-  // Recalculate bouquet size on orientation changes.
-  updateCameraFraming();
+  // Refit the bouquet whenever the screen changes.
+  fitCameraToBouquet();
 
 }
 
 
+// Observe the stage, not just the browser window.
 const resizeObserver = new ResizeObserver(
   resizeScene
 );
 
-resizeObserver.observe(
-  canvas.parentElement
-);
-
+resizeObserver.observe(canvas.parentElement);
 
 window.addEventListener(
   "resize",
   resizeScene
 );
-
-
-window.addEventListener(
-  "orientationchange",
-  () => {
-
-    setTimeout(resizeScene, 250);
-
-  }
-);
-
 
 resizeScene();
 
@@ -769,30 +586,11 @@ resizeScene();
    10. ANIMATION LOOP
 ========================================= */
 
-const clock = new THREE.Clock();
-
-let initialModelY = 0;
-
-
 function animate() {
 
   requestAnimationFrame(animate);
 
-  const elapsed = clock.getElapsedTime();
-
-
   controls.update();
-
-
-  // Gentle floating movement.
-  if (bouquetPivot) {
-
-    bouquetPivot.position.y =
-      initialModelY +
-      Math.sin(elapsed * 0.8) * 0.025;
-
-  }
-
 
   renderer.render(
     scene,
@@ -800,7 +598,6 @@ function animate() {
   );
 
 }
-
 
 animate();
 
@@ -812,7 +609,6 @@ animate();
 const envelopeButton =
   document.getElementById("envelopeButton");
 
-
 envelopeButton.addEventListener("click", () => {
 
   if (
@@ -821,9 +617,7 @@ envelopeButton.addEventListener("click", () => {
     return;
   }
 
-
   envelopeButton.classList.add("opening");
-
 
   setTimeout(() => {
 
