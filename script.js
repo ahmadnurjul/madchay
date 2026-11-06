@@ -82,15 +82,16 @@ function showScreen(name) {
 
     });
 
-  // Background music belongs to the flower screen only.
-  if (name === "flower") {
+  // Reveal the navigation for good once the audio screen has been opened.
+  if (name === "audio") {
+    document.body.classList.add("nav-unlocked");
+  }
 
-    tryStartMusic();
-
-  } else {
-
+  // Background music plays on flower + letter, pauses on audio.
+  if (name === "audio") {
     backgroundAudio.pause();
-
+  } else {
+    tryStartMusic();
   }
 
 }
@@ -134,14 +135,13 @@ function tryStartMusic() {
 
   // Only on the flower screen, only while the tab is visible,
   // and never on top of the surprise audio.
-  if (
-    currentScreen !== "flower" ||
+    if (
+    currentScreen === "audio" ||
     document.hidden ||
     !surpriseAudio.paused
   ) {
     return;
   }
-
   backgroundAudio.play()
     .then(removeUnlockListeners)
     .catch(() => {
@@ -495,6 +495,7 @@ loader.load(
     fitCameraToBouquet();
 
     // Hide the loading message.
+    document.getElementById("flowerStage").classList.add("is-ready");
     modelStatus.classList.add("hidden");
 
     console.info("3D bouquet loaded successfully.");
