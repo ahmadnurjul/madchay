@@ -33,24 +33,22 @@
 <main id="app">
 
   <!-- FLOWER SCREEN -->
-  <section class="screen screen--flower is-active" id="flowerScreen">
+    <section class="screen screen--flower is-active" id="flowerScreen">
 
     <div class="paper-grain"></div>
 
+    <!-- Loading/error message (outside the stage) -->
+    <div class="model-status" id="modelStatus">
+      <span class="loading-flower">✿</span>
+      <span id="modelStatusText">preparing your flowers...</span>
+    </div>
+
     <div class="flower-stage" id="flowerStage">
 
-      <!-- Actual interactive 3D bouquet -->
       <canvas id="flowerCanvas"
               aria-label="Interactive 3D bouquet. Drag to rotate.">
       </canvas>
 
-      <!-- Loading/error message -->
-      <div class="model-status" id="modelStatus">
-        <span class="loading-flower">✿</span>
-        <span id="modelStatusText">preparing your flowers...</span>
-      </div>
-
-      <!-- Interactive envelope -->
       <button id="envelopeButton"
               class="envelope-anchor"
               type="button"
