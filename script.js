@@ -6,6 +6,9 @@ import { GLTFLoader } from
 import { OrbitControls } from
   "three/addons/controls/OrbitControls.js";
 
+import { MeshoptDecoder } from
+  "three/addons/libs/meshopt_decoder.module.js";
+
 
 /* =========================================
    1. MODEL LOCATION
@@ -338,8 +341,11 @@ controls.maxPolarAngle = Math.PI * 0.78;
 ========================================= */
 
 let bouquet = null;
+let bouquetPivot = null;
 
 const loader = new GLTFLoader();
+
+loader.setMeshoptDecoder(MeshoptDecoder);
 
 
 loader.load(
