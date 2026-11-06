@@ -28,7 +28,7 @@
           <img src="assets/images/bouquet-reference.jpg" alt="Pink flower bouquet reference">
         </div>
         <canvas id="flowerCanvas" aria-label="Interactive 3D bouquet"></canvas>
-        <button id="envelopeButton" class="envelope-anchor" aria-label="Open your letter">
+        <button id="envelopeButton" class="envelope-anchor" type="button" aria-label="Open your letter">
           <span class="envelope">
             <span class="envelope-flap"></span>
             <span class="envelope-heart">♥</span>
@@ -39,7 +39,7 @@
       <p class="instruction">Drag the bouquet gently · tap the little letter</p>
       <div class="screen-footer">
         <span class="sound-status" id="soundStatus">♫ background music</span>
-        <button class="text-button" id="musicToggle" type="button">Sound on</button>
+        <button class="text-button" id="musicToggle" type="button" aria-pressed="false">Sound on</button>
       </div>
     </section>
 
@@ -90,15 +90,6 @@
         <button class="selected" data-go="audio" type="button">♫ <span>Audio</span></button>
       </nav>
     </section>
-
-    <div class="welcome-gate" id="welcomeGate">
-      <div class="welcome-card">
-        <span class="welcome-flower">✿</span>
-        <p>a little greeting awaits</p>
-        <button id="enterButton" type="button">tap to open ♡</button>
-        <small>sound begins after you enter</small>
-      </div>
-    </div>
   </main>
   <script type="module" src="script.js"></script>
 </body>
