@@ -12,7 +12,7 @@ import { OrbitControls } from
 ========================================= */
 
 // Make sure this matches your actual filename.
-const MODEL_URL = "models/boquet.glb";
+const MODEL_URL = "assets/models/boquet.glb";
 
 
 /* =========================================
