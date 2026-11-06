@@ -2,95 +2,256 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1, viewport-fit=cover">
+
   <meta name="theme-color" content="#ead8c8">
+
   <title>A Little Something for You</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
   <link rel="stylesheet" href="style.css">
+
   <script type="importmap">
-    {
-      "imports": {
-        "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
-        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"
-      }
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"
     }
+  }
   </script>
 </head>
+
 <body>
-  <main id="app" aria-live="polite">
-    <section class="screen screen--flower is-active" id="flowerScreen">
-      <div class="paper-grain"></div>
-      <p class="eyebrow">a little something, just for you</p>
-      <div class="flower-stage" id="flowerStage">
-        <div id="flowerFallback" class="flower-fallback" aria-label="Bouquet reference preview">
-          <img src="assets/images/bouquet-reference.jpg" alt="Pink flower bouquet reference">
+
+<main id="app">
+
+  <!-- FLOWER SCREEN -->
+  <section class="screen screen--flower is-active" id="flowerScreen">
+
+    <div class="paper-grain"></div>
+
+    <p class="eyebrow">
+      a little something, just for you
+    </p>
+
+    <div class="flower-stage" id="flowerStage">
+
+      <!-- Actual interactive 3D bouquet -->
+      <canvas id="flowerCanvas"
+              aria-label="Interactive 3D bouquet. Drag to rotate.">
+      </canvas>
+
+      <!-- Loading/error message -->
+      <div class="model-status" id="modelStatus">
+        <span class="loading-flower">✿</span>
+        <span id="modelStatusText">preparing your flowers...</span>
+      </div>
+
+      <!-- Interactive envelope -->
+      <button id="envelopeButton"
+              class="envelope-anchor"
+              type="button"
+              aria-label="Open your letter">
+
+        <span class="envelope">
+          <span class="envelope-flap"></span>
+          <span class="envelope-heart">♥</span>
+        </span>
+
+        <span class="envelope-hint">
+          a little note for you
+        </span>
+
+      </button>
+
+    </div>
+
+    <p class="instruction">
+      Drag the bouquet gently · tap the little letter
+    </p>
+
+    <div class="screen-footer">
+
+      <span class="sound-status" id="soundStatus">
+        ♫ background music
+      </span>
+
+      <button class="text-button"
+              id="musicToggle"
+              type="button">
+        Sound on
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- LETTER SCREEN -->
+  <section class="screen screen--letter" id="letterScreen">
+
+    <div class="paper-grain"></div>
+
+    <button class="back-button"
+            data-go="flower"
+            type="button">
+      ← flower
+    </button>
+
+    <article class="letter-card" id="letterCard">
+
+      <div class="letter-decoration">
+        ✿　♡　✿
+      </div>
+
+      <p class="letter-kicker">
+        a note from me to you
+      </p>
+
+      <h1>Dear you,</h1>
+
+      <div class="letter-copy">
+
+        <p>
+          I wanted to make you a little something.
+        </p>
+
+        <p>
+          Something soft, thoughtful, and full of little
+          details — just to remind you that you are
+          appreciated more than words can say.
+        </p>
+
+        <p>
+          I hope this brings a smile to your day.
+          You deserve all the lovely things. ♡
+        </p>
+
+      </div>
+
+      <p class="letter-signoff">
+        with love,
+        <span>me</span>
+      </p>
+
+      <div class="letter-decoration letter-decoration--bottom">
+        ✿　♡　✿
+      </div>
+
+      <button class="surprise-button"
+              id="surpriseButton"
+              type="button">
+        open your audio surprise ♫
+      </button>
+
+    </article>
+
+    <nav class="bottom-nav" aria-label="Main navigation">
+
+      <button data-go="flower" type="button">
+        ✿ <span>Flower</span>
+      </button>
+
+      <button class="selected" data-go="letter" type="button">
+        ♡ <span>Letter</span>
+      </button>
+
+      <button data-go="audio" type="button">
+        ♫ <span>Audio</span>
+      </button>
+
+    </nav>
+
+  </section>
+
+
+  <!-- AUDIO SCREEN -->
+  <section class="screen screen--audio" id="audioScreen">
+
+    <div class="paper-grain"></div>
+
+    <button class="back-button"
+            data-go="letter"
+            type="button">
+      ← letter
+    </button>
+
+    <div class="audio-content">
+
+      <p class="letter-kicker">
+        a little something extra
+      </p>
+
+      <div class="record-wrap">
+
+        <div class="record" id="record">
+          <div class="record-label">♡</div>
         </div>
-        <canvas id="flowerCanvas" aria-label="Interactive 3D bouquet"></canvas>
-        <button id="envelopeButton" class="envelope-anchor" type="button" aria-label="Open your letter">
-          <span class="envelope">
-            <span class="envelope-flap"></span>
-            <span class="envelope-heart">♥</span>
-          </span>
-          <span class="envelope-hint">a little note for you</span>
+
+        <div class="record-sparkle">✦</div>
+
+      </div>
+
+      <h1>One more thing...</h1>
+
+      <p class="audio-caption">
+        A little surprise, picked just for you.
+      </p>
+
+      <audio id="surpriseAudio"
+             src="assets/audio/surprise.mp3"
+             preload="metadata">
+      </audio>
+
+      <div class="player-controls">
+
+        <button id="playSurprise"
+                class="play-button"
+                type="button"
+                aria-label="Play surprise audio">
+          ▶
         </button>
-      </div>
-      <p class="instruction">Drag the bouquet gently · tap the little letter</p>
-      <div class="screen-footer">
-        <span class="sound-status" id="soundStatus">♫ background music</span>
-        <button class="text-button" id="musicToggle" type="button" aria-pressed="false">Sound on</button>
-      </div>
-    </section>
 
-    <section class="screen screen--letter" id="letterScreen">
-      <div class="paper-grain"></div>
-      <button class="back-button" data-go="flower" type="button">← flower</button>
-      <article class="letter-card" id="letterCard">
-        <div class="letter-decoration">✿　♡　✿</div>
-        <p class="letter-kicker">a note from me to you</p>
-        <h1>Dear you,</h1>
-        <div class="letter-copy">
-          <p>I wanted to make you a little something.</p>
-          <p>Something soft, thoughtful, and full of little details — just to remind you that you are appreciated more than words can say.</p>
-          <p>I hope this brings a smile to your day. You deserve all the lovely things. ♡</p>
-        </div>
-        <p class="letter-signoff">with love, <span>me</span></p>
-        <div class="letter-decoration letter-decoration--bottom">✿　♡　✿</div>
-        <button class="surprise-button" id="surpriseButton" type="button">open your audio surprise ♫</button>
-      </article>
-      <nav class="bottom-nav" aria-label="Main navigation">
-        <button data-go="flower" type="button">✿ <span>Flower</span></button>
-        <button class="selected" data-go="letter" type="button">♡ <span>Letter</span></button>
-        <button data-go="audio" type="button">♫ <span>Audio</span></button>
-      </nav>
-    </section>
+        <span id="audioTime">
+          your surprise awaits ♡
+        </span>
 
-    <section class="screen screen--audio" id="audioScreen">
-      <div class="paper-grain"></div>
-      <button class="back-button" data-go="letter" type="button">← letter</button>
-      <div class="audio-content">
-        <p class="letter-kicker">a little something extra</p>
-        <div class="record-wrap">
-          <div class="record" id="record"><div class="record-label">♡</div></div>
-          <div class="record-sparkle">✦</div>
-        </div>
-        <h1>One more thing...</h1>
-        <p class="audio-caption">A little surprise, picked just for you.</p>
-        <audio id="surpriseAudio" src="assets/audio/surprise.mp3" preload="metadata"></audio>
-        <div class="player-controls">
-          <button id="playSurprise" class="play-button" type="button" aria-label="Play surprise audio">▶</button>
-          <span id="audioTime">your surprise awaits ♡</span>
-        </div>
-        <p class="audio-note">Take your time. This one's for you.</p>
       </div>
-      <nav class="bottom-nav" aria-label="Main navigation">
-        <button data-go="flower" type="button">✿ <span>Flower</span></button>
-        <button data-go="letter" type="button">♡ <span>Letter</span></button>
-        <button class="selected" data-go="audio" type="button">♫ <span>Audio</span></button>
-      </nav>
-    </section>
-  </main>
-  <script type="module" src="script.js"></script>
+
+      <p class="audio-note">
+        Take your time. This one's for you.
+      </p>
+
+    </div>
+
+    <nav class="bottom-nav" aria-label="Main navigation">
+
+      <button data-go="flower" type="button">
+        ✿ <span>Flower</span>
+      </button>
+
+      <button data-go="letter" type="button">
+        ♡ <span>Letter</span>
+      </button>
+
+      <button class="selected" data-go="audio" type="button">
+        ♫ <span>Audio</span>
+      </button>
+
+    </nav>
+
+  </section>
+
+</main>
+
+<script type="module" src="script.js"></script>
+
 </body>
 </html>
