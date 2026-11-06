@@ -1,238 +1,235 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8">
+
   <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+        content="width=device-width, initial-scale=1, viewport-fit=cover">
 
-  <meta name="theme-color" content="#f5eadb">
+  <meta name="theme-color" content="#ead8c8">
 
-  <title>A Little Surprise ♡</title>
+  <title>A Little Something for You</title>
 
-  <!-- Three.js module configuration -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+
   <script type="importmap">
   {
     "imports": {
-      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
-      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+      "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"
     }
   }
   </script>
-
-  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-  <main id="app">
+<main id="app">
 
-    <!-- ===================================
-         FLOWER SCREEN
-    ==================================== -->
+  <!-- FLOWER SCREEN -->
+  <section class="screen screen--flower is-active" id="flowerScreen">
 
-    <section id="flowerScreen"
-             class="screen flower-screen is-active">
+    <div class="paper-grain"></div>
 
-      <div class="flower-heading">
-        <p class="eyebrow">a little something for you</p>
-        <h1>Just for you ♡</h1>
-        <p class="flower-subtitle">
-          A bouquet made with love
-        </p>
+    <div class="flower-stage" id="flowerStage">
+
+      <!-- Actual interactive 3D bouquet -->
+      <canvas id="flowerCanvas"
+              aria-label="Interactive 3D bouquet. Drag to rotate.">
+      </canvas>
+
+      <!-- Loading/error message -->
+      <div class="model-status" id="modelStatus">
+        <span class="loading-flower">✿</span>
+        <span id="modelStatusText">preparing your flowers...</span>
       </div>
 
-      <div class="flower-stage">
+      <!-- Interactive envelope -->
+      <button id="envelopeButton"
+              class="envelope-anchor"
+              type="button"
+              aria-label="Open your letter">
 
-        <canvas id="flowerCanvas"></canvas>
+        <span class="envelope">
+          <span class="envelope-flap"></span>
+          <span class="envelope-heart">♥</span>
+        </span>
 
-        <div id="modelStatus" class="model-status">
-          <span class="loading-spinner"></span>
-          <p id="modelStatusText">
-            preparing your flowers...
-          </p>
-        </div>
+        <span class="envelope-hint">
+          a little note for you
+        </span>
 
-        <!-- Hidden until the GLB loads successfully -->
-        <button
-          id="envelopeButton"
-          class="envelope-anchor"
-          type="button"
-          aria-label="Open your letter"
-          hidden
-        >
-          <span class="envelope">
+      </button>
 
-            <span class="envelope-body"></span>
+    </div>
 
-            <span class="envelope-flap"></span>
+  </section>
 
-            <span class="envelope-heart">♥</span>
 
-          </span>
+  <!-- LETTER SCREEN -->
+  <section class="screen screen--letter" id="letterScreen">
 
-          <span class="envelope-hint">
-            a letter for you
-          </span>
+    <div class="paper-grain"></div>
 
-        </button>
+    <button class="back-button"
+            data-go="flower"
+            type="button">
+      ← flower
+    </button>
 
+    <article class="letter-card" id="letterCard">
+
+      <div class="letter-decoration">
+        ✿　♡　✿
       </div>
 
-      <div class="flower-footer">
+      <p class="letter-kicker">
+        a note from me to you
+      </p>
 
-        <p class="flower-instruction">
-          Drag the flowers to look around ♡
-        </p>
+      <h1>Dear you,</h1>
 
-        <button
-          id="musicToggle"
-          class="music-toggle"
-          type="button"
-          aria-pressed="false"
-        >
-          <span>♫</span>
-          <span id="soundStatus">Sound on</span>
-        </button>
+      <div class="letter-copy">
 
-      </div>
-
-    </section>
-
-
-    <!-- ===================================
-         LETTER SCREEN
-    ==================================== -->
-
-    <section id="letterScreen"
-             class="screen letter-screen">
-
-      <div class="letter-container">
-
-        <div class="letter-decoration">♡</div>
-
-        <p class="eyebrow">a little message</p>
-
-        <h2>Dear you,</h2>
-
-        <div class="letter-content">
-
-          <p>
-            I hope these flowers bring a little happiness
-            to your day.
-          </p>
-
-          <p>
-            You deserve all the beautiful things this
-            world has to offer.
-          </p>
-
-          <p>
-            Thank you for being someone special.
-            I hope this little surprise makes you smile.
-          </p>
-
-          <p class="letter-signature">
-            With love, ♡
-          </p>
-
-        </div>
-
-        <button
-          id="surpriseButton"
-          class="primary-button"
-          type="button"
-        >
-          There's one more surprise ♡
-        </button>
-
-        <button
-          class="text-button"
-          data-go="flower"
-          type="button"
-        >
-          ← Back to your flowers
-        </button>
-
-      </div>
-
-    </section>
-
-
-    <!-- ===================================
-         AUDIO SURPRISE SCREEN
-    ==================================== -->
-
-    <section id="audioScreen"
-             class="screen audio-screen">
-
-      <div class="audio-container">
-
-        <p class="eyebrow">one last thing</p>
-
-        <h2>A little something for you ♡</h2>
-
-        <div id="record" class="record">
-
-          <div class="record-center">
-            <span>♡</span>
-          </div>
-
-        </div>
-
-        <p class="audio-description">
-          A little song, just for you.
+        <p>
+          I wanted to make you a little something.
         </p>
 
-        <button
-          id="playSurprise"
-          class="play-button"
-          type="button"
-          aria-label="Play surprise audio"
-        >
+        <p>
+          Something soft, thoughtful, and full of little
+          details — just to remind you that you are
+          appreciated more than words can say.
+        </p>
+
+        <p>
+          I hope this brings a smile to your day.
+          You deserve all the lovely things. ♡
+        </p>
+
+      </div>
+
+      <p class="letter-signoff">
+        with love,
+        <span>me</span>
+      </p>
+
+      <div class="letter-decoration letter-decoration--bottom">
+        ✿　♡　✿
+      </div>
+
+      <button class="surprise-button"
+              id="surpriseButton"
+              type="button">
+        open your audio surprise ♫
+      </button>
+
+    </article>
+
+    <nav class="bottom-nav" aria-label="Main navigation">
+
+      <button data-go="flower" type="button">
+        ✿ <span>Flower</span>
+      </button>
+
+      <button class="selected" data-go="letter" type="button">
+        ♡ <span>Letter</span>
+      </button>
+
+      <button data-go="audio" type="button">
+        ♫ <span>Audio</span>
+      </button>
+
+    </nav>
+
+  </section>
+
+
+  <!-- AUDIO SCREEN -->
+  <section class="screen screen--audio" id="audioScreen">
+
+    <div class="paper-grain"></div>
+
+    <button class="back-button"
+            data-go="letter"
+            type="button">
+      ← letter
+    </button>
+
+    <div class="audio-content">
+
+      <p class="letter-kicker">
+        a little something extra
+      </p>
+
+      <div class="record-wrap">
+
+        <div class="record" id="record">
+          <div class="record-label">♡</div>
+        </div>
+
+        <div class="record-sparkle">✦</div>
+
+      </div>
+
+      <h1>One more thing...</h1>
+
+      <p class="audio-caption">
+        A little surprise, picked just for you.
+      </p>
+
+      <audio id="surpriseAudio"
+             src="assets/audio/surprise.mp3"
+             preload="metadata">
+      </audio>
+
+      <div class="player-controls">
+
+        <button id="playSurprise"
+                class="play-button"
+                type="button"
+                aria-label="Play surprise audio">
           ▶
         </button>
 
-        <p id="audioTime" class="audio-time">
-          press play ♡
-        </p>
-
-        <audio
-          id="surpriseAudio"
-          src="assets/audio/surprise.mp3"
-          preload="metadata"
-        ></audio>
-
-        <button
-          class="text-button"
-          data-go="letter"
-          type="button"
-        >
-          ← Back to your letter
-        </button>
-
-        <button
-          class="text-button"
-          data-go="flower"
-          type="button"
-        >
-          Back to your flowers
-        </button>
+        <span id="audioTime">
+          your surprise awaits ♡
+        </span>
 
       </div>
 
-    </section>
+      <p class="audio-note">
+        Take your time. This one's for you.
+      </p>
 
-  </main>
+    </div>
 
-  <audio
-    id="backgroundAudio"
-    src="assets/audio/background.mp3"
-    loop
-    preload="auto"
-  ></audio>
+    <nav class="bottom-nav" aria-label="Main navigation">
 
-  <script type="module" src="script.js"></script>
+      <button data-go="flower" type="button">
+        ✿ <span>Flower</span>
+      </button>
+
+      <button data-go="letter" type="button">
+        ♡ <span>Letter</span>
+      </button>
+
+      <button class="selected" data-go="audio" type="button">
+        ♫ <span>Audio</span>
+      </button>
+
+    </nav>
+
+  </section>
+
+</main>
+
+<script type="module" src="script.js"></script>
 
 </body>
 </html>
