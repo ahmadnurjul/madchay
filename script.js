@@ -483,7 +483,7 @@ loader.load(
     modelStatus.classList.add("error");
 
     modelStatusText.textContent =
-      "The 3D bouquet could not load. Check models/boquet.glb";
+      "The 3D bouquet could not load. Check assets/models/boquet.glb";
 
   }
 
